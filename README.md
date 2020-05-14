@@ -1,7 +1,11 @@
 ## Instagram Scraper
 Scrapes `likes` and `comments` from a public instagram post
 
-There are 3 endpoints available-
+### Start Server 
+
+`npm start`
+
+### There are 3 endpoints available-
   - `/`:
     - **params**: `{ postUrl: <url of a public post> }`
     - **returns**: `{ likesCount: <like_count> ,commentCount: <comment_count>,imageUrl:<post_image_url> }`
