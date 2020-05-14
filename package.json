@@ -1,0 +1,22 @@
+{
+  "name": "instagram-scrapper",
+  "version": "1.0.0",
+  "description": "Scrapes instagram post's likes and comments",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "puppeteer": "^3.0.4",
+    "request-promise-native": "^1.0.8"
+  },
+  "devDependencies": {
+    "jest": "^26.0.1",
+    "supertest": "^4.0.2"
+  }
+}
