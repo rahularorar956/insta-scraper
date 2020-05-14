@@ -1,5 +1,6 @@
 const { validateURL } = require("./helpers");
 
+
 const fetchProfile = async (req, res) => {
   const page = res.locals.page;
   try {
