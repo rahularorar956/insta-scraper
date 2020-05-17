@@ -1,5 +1,4 @@
-const { validateURL } = require("./helpers");
-
+const { validateURL, saveInDB } = require("./helpers");
 
 const fetchProfile = async (req, res) => {
   const page = res.locals.page;
@@ -23,6 +22,9 @@ const fetchProfile = async (req, res) => {
         window.__initialData.data.entry_data.PostPage[0]
       ) {
         return {
+          id:
+            window.__initialData.data.entry_data.PostPage[0].graphql
+              .shortcode_media.shortcode,
           likesCount:
             window.__initialData.data.entry_data.PostPage[0].graphql
               .shortcode_media.edge_media_preview_like.count,
@@ -40,6 +42,9 @@ const fetchProfile = async (req, res) => {
         error: "This Post is Private. Please Try again with Public Post URL"
       });
     }
+
+    // saving in db
+    saveInDB(data);
     res.json({ data: data });
   } catch (e) {
     console.log(e);
@@ -63,9 +68,12 @@ const fetchLikes = async (req, res) => {
       const likeSelector = document.querySelectorAll(
         "button.sqdOP.yWX7d._8A5w5:not(.oW_lN)"
       );
+      const postId =
+        window.__initialData.data.entry_data.PostPage[0].graphql.shortcode_media
+          .shortcode;
       if (likeSelector && likeSelector[0]) {
         likeSelector[0].click();
-        return { error: false };
+        return { error: false, postId: postId };
       } else {
         return { error: true };
       }
@@ -93,6 +101,7 @@ const fetchLikes = async (req, res) => {
       if (response) {
         json = await response.json();
         const likesList = json.data.shortcode_media.edge_liked_by.edges;
+        const postId = json.data.shortcode_media.shortcode;
         if (likesList) {
           data.push(...likesList);
         }
@@ -109,6 +118,9 @@ const fetchLikes = async (req, res) => {
     if (likesList) {
       data.push(...likesList);
     }
+
+    // saving in db
+    saveInDB({ id: result.postId, likesList: data });
     res.json({ likesList: data });
   } catch (e) {
     return res.json({ error: "Something went wrong! Please try again " });
@@ -128,25 +140,30 @@ const fetchComments = async (req, res) => {
 
     let data = [];
 
-    let { commentList, has_next_page, error } = await page.evaluate(() => {
-      if (
-        window.__initialData &&
-        window.__initialData.data &&
-        window.__initialData.data.entry_data &&
-        window.__initialData.data.entry_data.PostPage
-      ) {
-        let commentObj =
-          window.__initialData.data.entry_data.PostPage[0].graphql
-            .shortcode_media.edge_media_to_parent_comment;
-        return {
-          commentList: commentObj.edges,
-          has_next_page: commentObj.page_info.has_next_page,
-          error: false
-        };
-      } else {
-        return { error: true };
+    let { commentList, has_next_page, error, postId } = await page.evaluate(
+      () => {
+        if (
+          window.__initialData &&
+          window.__initialData.data &&
+          window.__initialData.data.entry_data &&
+          window.__initialData.data.entry_data.PostPage
+        ) {
+          let commentObj =
+            window.__initialData.data.entry_data.PostPage[0].graphql
+              .shortcode_media.edge_media_to_parent_comment;
+          return {
+            postId:
+              window.__initialData.data.entry_data.PostPage[0].graphql
+                .shortcode_media.shortcode,
+            commentList: commentObj.edges,
+            has_next_page: commentObj.page_info.has_next_page,
+            error: false
+          };
+        } else {
+          return { error: true };
+        }
       }
-    });
+    );
     if (error) {
       return res.json({
         error: "This Post is Private. Please Try again with Public Post URL"
@@ -184,7 +201,7 @@ const fetchComments = async (req, res) => {
             .has_next_page | false;
       }
     }
-
+    saveInDB({ id: postId, commentList: data });
     res.json({ commentList: data });
   } catch (e) {
     console.log(e);
