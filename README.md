@@ -3,7 +3,12 @@ Scrapes `likes` and `comments` from a public instagram post
 
 ### Start Server 
 
-`npm start`
+  - `cd server/`
+  - `npm start`
+ 
+### Start Client
+  - `cd client/`
+  - `npm start`
 
 ### There are 3 endpoints available-
   - `/`:
