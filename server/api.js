@@ -114,15 +114,11 @@ const fetchLikes = async (req, res) => {
       });
     } while (json.data.shortcode_media.edge_liked_by.page_info.has_next_page);
 
-    likesList = json.data.shortcode_media.edge_liked_by.edges;
-    if (likesList) {
-      data.push(...likesList);
-    }
-
     // saving in db
     saveInDB({ id: result.postId, likesList: data });
     res.json({ likesList: data });
   } catch (e) {
+    console.log(e)
     return res.json({ error: "Something went wrong! Please try again " });
   }
 };

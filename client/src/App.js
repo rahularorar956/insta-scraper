@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import axios from "axios";
+import axios from "./api";
 // get our fontawesome imports
 import {
   faHeart,
@@ -29,27 +29,25 @@ class App extends React.Component {
     const handle = e => {
       e.preventDefault();
       this.setState({ loading: true });
-      axios
-        .post("http://localhost:3001/", { postUrl: this.input.value })
-        .then(response => {
-          if (response.data.error) {
-            this.setState({
-              errorMessage: response.data.error,
-              postUrl: "",
-              loading: false
-            });
-            return;
-          }
-          let data = response.data.data;
+      axios.post("/", { postUrl: this.input.value }).then(response => {
+        if (response.data.error) {
           this.setState({
-            postUrl: this.input.value,
-            likesCount: data.likesCount,
-            imageUrl: data.imageUrl,
-            commentCount: data.commentCount,
-            errorMessage: "",
+            errorMessage: response.data.error,
+            postUrl: "",
             loading: false
           });
+          return;
+        }
+        let data = response.data.data;
+        this.setState({
+          postUrl: this.input.value,
+          likesCount: data.likesCount,
+          imageUrl: data.imageUrl,
+          commentCount: data.commentCount,
+          errorMessage: "",
+          loading: false
         });
+      });
     };
 
     const showLikes = e => {
@@ -57,7 +55,7 @@ class App extends React.Component {
 
       this.setState({ loading: true });
       axios
-        .post("http://localhost:3001/fetchLikes", {
+        .post("/fetchLikes", {
           postUrl: this.state.postUrl
         })
         .then(response => {
@@ -83,7 +81,7 @@ class App extends React.Component {
 
       this.setState({ loading: true });
       axios
-        .post("http://localhost:3001/fetchComments", {
+        .post("/fetchComments", {
           postUrl: this.state.postUrl
         })
         .then(response => {
@@ -124,7 +122,7 @@ class App extends React.Component {
       <>
         {this.state.loading && (
           <div id="spinner">
-            <div class="loading"></div>
+            <div className="loading"></div>
             <p>
               Fetching Data...
               <br /> Please wait !!
@@ -193,10 +191,13 @@ class App extends React.Component {
                 <div className="modal-body">
                   {this.state.likesList.length > 0 &&
                     this.state.likesList.map(item => (
-                      <div className="chip" title={item.node.username}>
+                      <div
+                        className="chip"
+                        title={item.node.username}
+                        key={item.node.id}
+                      >
                         <img
                           src={item.node.profile_pic_url}
-                          key={item.node.id}
                           alt="Person"
                           width="96"
                           height="96"
@@ -214,13 +215,13 @@ class App extends React.Component {
                             item.node.edge_threaded_comments.edges
                           );
                         }}
+                        key={item.node.id}
                         className="chip"
                         title={item.node.owner.username}
                         style={{ cursor: "pointer" }}
                       >
                         <img
                           src={item.node.owner.profile_pic_url}
-                          key={item.node.id}
                           alt="Person"
                           width="96"
                           height="96"
@@ -257,6 +258,7 @@ class App extends React.Component {
                         className="chip"
                         title={item.node.owner.username}
                         style={{ cursor: "pointer" }}
+                        key={item.node.id}
                       >
                         <img
                           src={item.node.owner.profile_pic_url}
